@@ -1,0 +1,59 @@
+networks:
+  monsterpay-api-network:
+    driver: bridge
+    ipam:
+      driver: default
+
+services:
+  monsterpay-api:
+    container_name: monsterpay-api
+    build:
+      context: docker
+      dockerfile: app.Dockerfile
+      args:
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    command: [ "php", "/var/www/bin/hyperf.php", "start" ]
+    volumes:
+      - ./src:/var/www
+    ports:
+      - '8087:80'
+    expose:
+      - '8087'
+    networks:
+      - monsterpay-api-network
+    depends_on:
+      - monsterpay-api-db
+      - monsterpay-api-redis
+    environment:
+      - TZ=America/Sao_Paulo
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8087" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  monsterpay-api-db:
+    container_name: monsterpay-api-db
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: monsterpay-api
+    ports:
+      - '3376:3306'
+    volumes:
+      - monsterpay-api-db-volume:/var/lib/mysql
+    networks:
+      - monsterpay-api-network
+
+  monsterpay-api-redis:
+    container_name: monsterpay-api-redis
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    networks:
+      - monsterpay-api-network
+
+volumes:
+  monsterpay-api-db-volume:
