@@ -4,6 +4,8 @@
 Forged in the depths of legacy code, it thrives where others timeout.  
 Built for the chaos of the **Rinha de Backend 2025**, it may look like a monster — but it's fast, smart, and dangerously efficient.
 
+![The Monster is Back!](/docs/evilphp.png)
+
 ---
 
 ## ⚙️ Tech Stack
