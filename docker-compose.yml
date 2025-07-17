@@ -17,9 +17,9 @@ services:
     volumes:
       - ./src:/var/www
     ports:
-      - '8087:80'
+      - '8088:80'
     expose:
-      - '8087'
+      - '8088'
     networks:
       - monsterpay-api-network
     depends_on:
@@ -28,7 +28,7 @@ services:
     environment:
       - TZ=America/Sao_Paulo
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8087" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8088" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -40,7 +40,7 @@ services:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: monsterpay-api
     ports:
-      - '3376:3306'
+      - '3806:3306'
     volumes:
       - monsterpay-api-db-volume:/var/lib/mysql
     networks:
@@ -51,7 +51,7 @@ services:
     image: redis:alpine
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - '6389:6389'
     networks:
       - monsterpay-api-network
 

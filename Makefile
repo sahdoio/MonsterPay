@@ -11,32 +11,32 @@ show-vars:
 	@echo "GROUPID: $(GROUPID)"
 
 go: stop
-	$(DC) run ptrain-api composer install
+	$(DC) run monsterpay-api composer install
 	$(DC) up -d --build
 
 stop:
 	$(DC) down
 
 sh:
-	$(DC) exec ptrain-api sh
+	$(DC) exec monsterpay-api sh
 
 test:
-	$(DC) exec ptrain-api composer test
+	$(DC) exec monsterpay-api composer test
 
 test-report:
-	$(DC) exec ptrain-api vendor/bin/pest --coverage-html=report
+	$(DC) exec monsterpay-api vendor/bin/pest --coverage-html=report
 
 logs:
 	$(DC) logs -f --tail=10
 
 migrate:
-	$(DC) exec ptrain-api php artisan migrate
+	$(DC) exec monsterpay-api php artisan migrate
 
 rollback:
-	$(DC) exec ptrain-api php artisan migrate:rollback
+	$(DC) exec monsterpay-api php artisan migrate:rollback
 
 horizon:
-	$(DC) exec ptrain-api php artisan horizon
+	$(DC) exec monsterpay-api php artisan horizon
 
 app-log:
-	$(DC) exec ptrain-api tail -f storage/logs/laravel.log -n 0
+	$(DC) exec monsterpay-api tail -f storage/logs/laravel.log -n 0
