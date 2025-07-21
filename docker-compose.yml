@@ -8,8 +8,8 @@ services:
   monsterpay-api:
     container_name: monsterpay-api
     build:
-      context: docker
-      dockerfile: app.Dockerfile
+      context: ./
+      dockerfile: Dockerfile
       args:
         USERID: ${USERID}
         GROUPID: ${GROUPID}
