@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\UseCases;
 
 use App\Clients\ProcessorClient;
+use App\DataTransferObjects\OutputPaymentDTO;
+use App\Enums\ProcessorType;
 use App\Repositories\PaymentSummaryRepository;
 use App\Services\HealthMonitor;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\HttpServer\Contract\ResponseInterface;
-use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Exception;
 
 class ProcessPayment
 {
@@ -22,31 +23,28 @@ class ProcessPayment
     #[Inject]
     protected HealthMonitor $health;
 
-    #[Inject]
-    protected ResponseInterface $response;
-
-    public function execute(string $correlationId, float $amount): PsrResponseInterface
+    /**
+     * @throws Exception
+     */
+    public function execute(string $correlationId, float $amount): OutputPaymentDTO
     {
-        // 1. Try the default processor
         $processor = $this->health->getOptimalProcessor();
 
         $result = $this->client->send($processor, $correlationId, $amount);
 
         if ($result['success']) {
             $this->summary->register($processor, $amount);
-            return $this->response->json(['status' => 'ok']);
+            return new OutputPaymentDTO(status: 'ok', processor: $processor);
         }
 
-        // 2. Try the fallback processor if the default failed
-        if ($processor === 'default') {
-            $fallbackResult = $this->client->send('fallback', $correlationId, $amount);
+        if (ProcessorType::DEFAULT === $processor) {
+            $fallbackResult = $this->client->send(ProcessorType::FALLBACK, $correlationId, $amount);
             if ($fallbackResult['success']) {
-                $this->summary->register('fallback', $amount);
-                return $this->response->json(['status' => 'ok', 'fallback' => true]);
+                $this->summary->register(ProcessorType::FALLBACK, $amount);
+                return new OutputPaymentDTO(status: 'ok', processor: ProcessorType::FALLBACK);
             }
         }
 
-        // 3. If both processors failed, return an error
-        return $this->response->json(['error' => 'Failed to process payment'])->withStatus(502);
+        throw new Exception('Payment processing failed for both processors.', 500);
     }
 }

@@ -1,8 +1,8 @@
 networks:
   monsterpay-api-network:
     driver: bridge
-    ipam:
-      driver: default
+  payment-processor:
+    external: true
 
 services:
   monsterpay-api:
@@ -22,6 +22,7 @@ services:
       - '8088'
     networks:
       - monsterpay-api-network
+      - payment-processor
     depends_on:
       - monsterpay-api-db
       - monsterpay-api-redis

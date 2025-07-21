@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Clients;
 
+use App\Enums\ProcessorType;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Hyperf\Di\Annotation\Inject;
 use Psr\Log\LoggerInterface;
+use function Hyperf\Support\env;
 
 class ProcessorClient
 {
@@ -17,14 +19,21 @@ class ProcessorClient
     #[Inject]
     protected LoggerInterface $logger;
 
-    protected array $endpoints = [
-        'default' => 'http://payment-processor-default:8080/payments',
-        'fallback' => 'http://payment-processor-fallback:8080/payments',
-    ];
+    protected array $endpoints;
 
-    public function send(string $processor, string $correlationId, float $amount): array
+    public function __init(): void
     {
-        $url = $this->endpoints[$processor] ?? null;
+        $this->endpoints = [
+            ProcessorType::DEFAULT->value => env('PROCESSOR_DEFAULT_URL') . '/payments',
+            ProcessorType::FALLBACK->value => env('PROCESSOR_FALLBACK_URL') . '/payments',
+        ];
+
+        $this->logger->info(sprintf('endpoints initialized: %s', json_encode($this->endpoints)));
+    }
+
+    public function send(ProcessorType $processor, string $correlationId, float $amount): array
+    {
+        $url = $this->endpoints[$processor->value] ?? null;
 
         if (!$url) {
             $this->logger->error("Unknown processor: $processor");

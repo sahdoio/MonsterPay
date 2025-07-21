@@ -1,7 +1,8 @@
 # Variables
 DC=USERID=$(USERID) GROUPID=$(GROUPID) docker compose --file docker-compose.yml --env-file ./src/.env
+DC_PROD=docker compose --file docker-compose.prod.yml
 
-.PHONY: up down sh logs setup test migrate rollback horizon app-log
+.PHONY: up down sh logs setup test migrate rollback horizon app-log prod-up prod-down prod-logs
 
 USERID := $(shell id -u)
 GROUPID := $(shell id -g)
@@ -13,6 +14,7 @@ show-vars:
 go: stop
 	$(DC) run monsterpay-api composer install
 	$(DC) up -d --build
+	make logs
 
 stop:
 	$(DC) down
@@ -29,14 +31,15 @@ test-report:
 logs:
 	$(DC) logs -f --tail=10
 
-migrate:
-	$(DC) exec monsterpay-api php artisan migrate
+log:
+	$(DC) exec monsterpay-api tail -f runtime/logs/hyperf.log
 
-rollback:
-	$(DC) exec monsterpay-api php artisan migrate:rollback
+# ⚙️ Produção / Rinha de Backend
+prod-up:
+	$(DC_PROD) up -d --build
 
-horizon:
-	$(DC) exec monsterpay-api php artisan horizon
+prod-down:
+	$(DC_PROD) down
 
-app-log:
-	$(DC) exec monsterpay-api tail -f storage/logs/laravel.log -n 0
+prod-logs:
+	$(DC_PROD) logs -f --tail=20

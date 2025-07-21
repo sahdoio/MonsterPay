@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: monsterpay-nginx
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api1
+      - api2
+    ports:
+      - "9999:9999"
+    networks:
+      - monsterpay
+      - payment-processor
+    deploy:
+      resources:
+        limits:
+          cpus: "0.15"
+          memory: "15MB"
+
+  api1: &api
+    build:
+      context: ./docker
+      dockerfile: app.Dockerfile
+    container_name: monsterpay-api-1
+    hostname: api1
+    command: ["php", "/var/www/bin/hyperf.php", "start"]
+    volumes:
+      - ./src:/var/www
+    environment:
+      - TZ=America/Sao_Paulo
+      - REDIS_HOST=redis
+      - PROCESSOR_DEFAULT_URL=http://payment-processor-default:8080
+      - PROCESSOR_FALLBACK_URL=http://payment-processor-fallback:8080
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - monsterpay
+      - payment-processor
+    deploy:
+      resources:
+        limits:
+          cpus: "0.55"
+          memory: "50MB"
+
+  api2:
+    <<: *api
+    container_name: monsterpay-api-2
+    hostname: api2
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: monsterpay-redis
+    command: redis-server --save "" --appendonly no --maxclients 10000
+    networks:
+      - monsterpay
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: "230MB"
+
+networks:
+  monsterpay:
+    driver: bridge
+  payment-processor:
+    external: true

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\ProcessorType;
 use GuzzleHttp\Client;
 use Hyperf\Di\Annotation\Inject;
 use Psr\SimpleCache\CacheInterface;
 use Psr\Log\LoggerInterface;
+use function Hyperf\Support\env;
+use Throwable;
 
 class HealthMonitor
 {
@@ -20,48 +23,52 @@ class HealthMonitor
     #[Inject]
     protected LoggerInterface $logger;
 
-    protected array $endpoints = [
-        'default' => 'http://payment-processor-default:8080/payments/service-health',
-        'fallback' => 'http://payment-processor-fallback:8080/payments/service-health',
-    ];
+    protected array $endpoints;
 
-    public function getOptimalProcessor(): string
+    public function __init(): void
     {
-        $defaultHealthy = $this->isHealthy('default');
-        $fallbackHealthy = $this->isHealthy('fallback');
+        $this->endpoints = [
+            ProcessorType::DEFAULT->value => env('PROCESSOR_DEFAULT_URL') . '/payments/service-health',
+            ProcessorType::FALLBACK->value => env('PROCESSOR_FALLBACK_URL') . '/payments/service-health',
+        ];
+    }
+
+    public function getOptimalProcessor(): ProcessorType
+    {
+        $defaultHealthy = $this->isHealthy(ProcessorType::DEFAULT);
+        $fallbackHealthy = $this->isHealthy(ProcessorType::FALLBACK);
 
         if ($defaultHealthy) {
-            return 'default';
+            return ProcessorType::DEFAULT;
         }
 
         if ($fallbackHealthy) {
-            return 'fallback';
+            return ProcessorType::FALLBACK;
         }
 
-        return 'default';
+        return ProcessorType::DEFAULT;
     }
 
-    protected function isHealthy(string $processor): bool
+    protected function isHealthy(ProcessorType $processor): bool
     {
-        $cacheKey = "processor_health:{$processor}";
+        $key = $processor->value;
+        $cacheKey = "processor_health:$key";
 
-        // Uses cache to avoid repeated checks
         if ($this->cache->has($cacheKey)) {
             return $this->cache->get($cacheKey);
         }
 
-        $url = $this->endpoints[$processor] ?? null;
+        $url = $this->endpoints[$key] ?? null;
 
         try {
             $res = $this->http->get($url, ['timeout' => 0.2]);
             $data = json_decode((string)$res->getBody(), true);
-
             $healthy = !$data['failing'];
             $this->cache->set($cacheKey, $healthy, 5);
             return $healthy;
-
-        } catch (\Throwable $e) {
-            $this->logger->warning("Health check failed for [$processor]: " . $e->getMessage());
+        } catch (Throwable $e) {
+            $this->logger->error("error: ", $e);
+            $this->logger->warning("Health check failed for [$key]: " . $e->getMessage());
             $this->cache->set($cacheKey, false, 5);
             return false;
         }

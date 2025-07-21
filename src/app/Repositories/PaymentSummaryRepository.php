@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\ProcessorType;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Redis\Redis;
 
@@ -15,7 +16,7 @@ class PaymentSummaryRepository
     protected const string KEY_TOTAL_REQUESTS = 'summary:%s:requests';
     protected const string KEY_TOTAL_AMOUNT   = 'summary:%s:amount';
 
-    public function register(string $processor, float $amount): void
+    public function register(ProcessorType $processor, float $amount): void
     {
         $this->redis->incr(sprintf(self::KEY_TOTAL_REQUESTS, $processor));
         $this->redis->incrbyfloat(sprintf(self::KEY_TOTAL_AMOUNT, $processor), $amount);
