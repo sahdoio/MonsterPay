@@ -7,7 +7,6 @@ namespace App\UseCases;
 use App\Repositories\PaymentSummaryRepository;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\ResponseInterface;
-use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class GetPaymentsSummary
 {
@@ -17,10 +16,8 @@ class GetPaymentsSummary
     #[Inject]
     protected ResponseInterface $response;
 
-    public function execute(): PsrResponseInterface
+    public function execute(): array
     {
-        $data = $this->summary->get();
-
-        return $this->response->json($data);
+        return $this->summary->get();
     }
 }

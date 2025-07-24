@@ -18,8 +18,8 @@ class PaymentSummaryRepository
 
     public function register(ProcessorType $processor, float $amount): void
     {
-        $this->redis->incr(sprintf(self::KEY_TOTAL_REQUESTS, $processor));
-        $this->redis->incrbyfloat(sprintf(self::KEY_TOTAL_AMOUNT, $processor), $amount);
+        $this->redis->incr(sprintf(self::KEY_TOTAL_REQUESTS, $processor->value));
+        $this->redis->incrbyfloat(sprintf(self::KEY_TOTAL_AMOUNT, $processor->value), $amount);
     }
 
     public function get(): array

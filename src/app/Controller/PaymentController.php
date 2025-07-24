@@ -31,12 +31,18 @@ class PaymentController
             return $response->json(['error' => 'Missing correlationId or amount'])->withStatus(400);
         }
 
-        return $this->processPayment->execute($data['correlationId'], (float)$data['amount']);
+        $result = $this->processPayment->execute($data['correlationId'], (float)$data['amount']);
+
+        return $response->json([
+            'status' => $result->status,
+            'processor' => $result->processor->value,
+        ]);
     }
 
     #[RequestMapping(path: "/payments-summary", methods: "GET")]
-    public function summary(): PsrResponseInterface
+    public function summary(ResponseInterface $response): PsrResponseInterface
     {
-        return $this->getPaymentsSummary->execute();
+        $result =  $this->getPaymentsSummary->execute();
+        return $response->json($result)->withStatus(200);
     }
 }

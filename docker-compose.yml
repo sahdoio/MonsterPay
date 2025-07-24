@@ -13,7 +13,7 @@ services:
       args:
         USERID: ${USERID}
         GROUPID: ${GROUPID}
-    command: [ "php", "/var/www/bin/hyperf.php", "start" ]
+    command: [ "php", "/var/www/bin/hyperf.php", "server:watch" ]
     volumes:
       - ./src:/var/www
     ports:

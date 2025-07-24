@@ -35,6 +35,27 @@ RUN set -ex \
 RUN addgroup -g $GROUPID -S hyperf
 RUN adduser -u $USERID -G hyperf -S hyperf
 
+# install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN mkdir -p /var/www && chown -R hyperf:hyperf /var/www
+
+RUN apk add --no-cache --virtual .build-deps \
+        build-base \
+        autoconf \
+        automake \
+        libtool \
+        wget \
+    && cd /tmp \
+    && wget https://github.com/emcrisostomo/fswatch/releases/download/1.14.0/fswatch-1.14.0.tar.gz \
+    && tar -xf fswatch-1.14.0.tar.gz \
+    && cd fswatch-1.14.0 \
+    && ./configure \
+    && make \
+    && make install \
+    && apk del .build-deps \
+    && rm -rf /tmp/*
+
 USER hyperf
 
 WORKDIR /var/www

@@ -21,14 +21,12 @@ class ProcessorClient
 
     protected array $endpoints;
 
-    public function __init(): void
+    public function __construct()
     {
         $this->endpoints = [
             ProcessorType::DEFAULT->value => env('PROCESSOR_DEFAULT_URL') . '/payments',
             ProcessorType::FALLBACK->value => env('PROCESSOR_FALLBACK_URL') . '/payments',
         ];
-
-        $this->logger->info(sprintf('endpoints initialized: %s', json_encode($this->endpoints)));
     }
 
     public function send(ProcessorType $processor, string $correlationId, float $amount): array
@@ -36,7 +34,7 @@ class ProcessorClient
         $url = $this->endpoints[$processor->value] ?? null;
 
         if (!$url) {
-            $this->logger->error("Unknown processor: $processor");
+            $this->logger->error("Unknown processor: $processor->value");
             return ['success' => false];
         }
 
@@ -57,7 +55,7 @@ class ProcessorClient
             return ['success' => false];
 
         } catch (GuzzleException $e) {
-            $this->logger->warning("Processor [$processor] failed: " . $e->getMessage());
+            $this->logger->warning("Processor [$processor->value] failed: " . $e->getMessage());
             return ['success' => false];
         }
     }

@@ -25,7 +25,7 @@ class HealthMonitor
 
     protected array $endpoints;
 
-    public function __init(): void
+    public function __construct()
     {
         $this->endpoints = [
             ProcessorType::DEFAULT->value => env('PROCESSOR_DEFAULT_URL') . '/payments/service-health',
@@ -67,7 +67,11 @@ class HealthMonitor
             $this->cache->set($cacheKey, $healthy, 5);
             return $healthy;
         } catch (Throwable $e) {
-            $this->logger->error("error: ", $e);
+            $this->logger->error("error: ", [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
             $this->logger->warning("Health check failed for [$key]: " . $e->getMessage());
             $this->cache->set($cacheKey, false, 5);
             return false;
