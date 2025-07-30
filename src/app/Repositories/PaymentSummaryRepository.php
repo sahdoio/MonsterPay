@@ -24,7 +24,7 @@ class PaymentSummaryRepository
 
     public function get(): array
     {
-        $types = ['default', 'fallback'];
+        $types = [ProcessorType::DEFAULT->value, ProcessorType::FALLBACK->value];
 
         $summary = [];
 

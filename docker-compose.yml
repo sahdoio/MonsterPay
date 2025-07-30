@@ -52,7 +52,7 @@ services:
     image: redis:alpine
     restart: unless-stopped
     ports:
-      - '6389:6389'
+      - '6389:6379'
     networks:
       - monsterpay-api-network
 
