@@ -17,9 +17,9 @@ services:
     volumes:
       - ./src:/var/www
     ports:
-      - '8088:80'
+      - '9999:80'
     expose:
-      - '8088'
+      - '9999'
     networks:
       - monsterpay-api-network
       - payment-processor
@@ -29,7 +29,7 @@ services:
     environment:
       - TZ=America/Sao_Paulo
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8088" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:9999" ]
       interval: 10s
       timeout: 5s
       retries: 3

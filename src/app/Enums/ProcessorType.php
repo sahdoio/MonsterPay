@@ -6,6 +6,6 @@ namespace App\Enums;
 
 enum ProcessorType: string
 {
-    case DEFAULT = 'DEFAULT';
-    case FALLBACK = 'FALLBACK';
+    case DEFAULT = 'default';
+    case FALLBACK = 'fallback';
 }
