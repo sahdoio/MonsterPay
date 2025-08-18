@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  k6:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      MAX_REQUESTS: 500

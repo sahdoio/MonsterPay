@@ -10,7 +10,9 @@ use App\Services\HealthMonitor;
 use Exception;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Redis\Redis;
+use Psr\Log\LoggerInterface;
 
+// TODO: Solve dependency injection for CacheInterface
 // use Psr\SimpleCache\CacheInterface;
 
 class ProcessPayment
@@ -24,6 +26,9 @@ class ProcessPayment
     #[Inject]
     protected HealthMonitor $health;
 
+    #[Inject]
+    protected LoggerInterface $logger;
+
     /**
      * TODO: Solve dependency injection for CacheInterface
      * #[Inject]
@@ -31,24 +36,35 @@ class ProcessPayment
      */
 
     #[Inject]
+    /**
+     * TODO: Migrate to a cache service class.
+     *       That abstracts the Redis logic.
+     *       This will allow for easier testing and future changes.
+     *       The current implementation is tightly coupled to the Redis client.
+     */
     protected Redis $cache;
+
+    protected string $lockKey;
 
     /**
      * @throws Exception
      */
     public function execute(string $correlationId, float $amount): OutputPaymentDTO
     {
-        $lockKey = "payment_lock:$correlationId";
+        $this->logger->info('[ProcessPayment] Processing payment', [
+            'correlationId' => $correlationId,
+            'amount' => $amount,
+        ]);
 
-        if ($this->cache->exists($lockKey)) {
+        if (!$this->verifyCache($correlationId)) {
             throw new Exception('Duplicate correlationId: payment already being processed or processed.', 409);
         }
-
-        $this->cache->set($lockKey, '1');
 
         $processor = $this->health->getOptimalProcessor();
 
         $result = $this->client->send($processor, $correlationId, $amount);
+
+        var_dump('[ProcessPayment] Result from processor: ', $result);
 
         if ($result['success']) {
             $this->summary->register($processor, $amount);
@@ -64,7 +80,23 @@ class ProcessPayment
             }
         }
 
-        $this->cache->del($lockKey);
+        if ($this->lockKey) {
+            $this->cache->del($this->lockKey);
+        }
+
         throw new Exception('Payment processing failed for both processors.', 500);
+    }
+
+    private function verifyCache(string $correlationId): bool
+    {
+        $this->lockKey = "payment_lock:$correlationId";
+
+        if ($this->cache->exists($this->lockKey)) {
+            return false;
+        }
+
+        $this->cache->set($this->lockKey, '1');
+
+        return true;
     }
 }

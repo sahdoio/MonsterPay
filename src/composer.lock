@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c5a24aefd67d9545b5d7b943e4061eca",
+    "content-hash": "d697a99bac72993df7cbf7d44ac3dff2",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -757,25 +757,27 @@
         },
         {
             "name": "hyperf/async-queue",
-            "version": "v3.1.51",
+            "version": "v3.1.57",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hyperf/async-queue.git",
-                "reference": "29f49ba266dd0a5763e2c4d8edfe5a448f944ff0"
+                "reference": "f2c5732e027f7a27f034831831c2cf14d372c08b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hyperf/async-queue/zipball/29f49ba266dd0a5763e2c4d8edfe5a448f944ff0",
-                "reference": "29f49ba266dd0a5763e2c4d8edfe5a448f944ff0",
+                "url": "https://api.github.com/repos/hyperf/async-queue/zipball/f2c5732e027f7a27f034831831c2cf14d372c08b",
+                "reference": "f2c5732e027f7a27f034831831c2cf14d372c08b",
                 "shasum": ""
             },
             "require": {
                 "hyperf/codec": "~3.1.0",
                 "hyperf/collection": "~3.1.0",
                 "hyperf/command": "~3.1.0",
+                "hyperf/context": "~3.1.0",
                 "hyperf/contract": "~3.1.0",
+                "hyperf/coroutine": "~3.1.0",
+                "hyperf/stringable": "~3.1.0",
                 "hyperf/support": "~3.1.0",
-                "hyperf/utils": "~3.1.0",
                 "php": ">=8.1",
                 "psr/container": "^1.0 || ^2.0",
                 "psr/event-dispatcher": "^1.0"
@@ -830,7 +832,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2025-01-14T06:55:15+00:00"
+            "time": "2025-06-06T02:41:30+00:00"
         },
         {
             "name": "hyperf/cache",

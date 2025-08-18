@@ -1,8 +1,9 @@
 # Variables
 DC=USERID=$(USERID) GROUPID=$(GROUPID) docker compose --file docker-compose.yml --env-file ./src/.env
+DC_INFRA=docker compose --file ./infra/payment-processor/docker-compose.yml
 DC_PROD=docker compose --file docker-compose.prod.yml
 
-.PHONY: up down sh logs setup test migrate rollback horizon app-log prod-up prod-down prod-logs
+.PHONY: all go stop sh test test-report logs log infra-up infra-down prod-up prod-down prod-logs show-vars
 
 USERID := $(shell id -u)
 GROUPID := $(shell id -g)
@@ -11,7 +12,7 @@ show-vars:
 	@echo "USERID: $(USERID)"
 	@echo "GROUPID: $(GROUPID)"
 
-go: stop
+go: infra-down infra-up stop
 	$(DC) run monsterpay-api composer install
 	$(DC) up -d --build
 	make logs
@@ -34,7 +35,12 @@ logs:
 log:
 	$(DC) exec monsterpay-api tail -f runtime/logs/hyperf.log
 
-# ⚙️ Produção / Rinha de Backend
+infra-up:
+	$(DC_INFRA) up -d --build
+
+infra-down:
+	$(DC_INFRA) down
+
 prod-up:
 	$(DC_PROD) up -d --build
 
@@ -43,3 +49,6 @@ prod-down:
 
 prod-logs:
 	$(DC_PROD) logs -f --tail=20
+
+k6-test:
+	k6 run infra/test/rinha.js
