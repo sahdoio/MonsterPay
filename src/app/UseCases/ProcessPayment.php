@@ -57,7 +57,7 @@ class ProcessPayment
         ]);
 
         if (!$this->verifyCache($correlationId)) {
-            throw new Exception('Duplicate correlationId: payment already being processed or processed.', 409);
+            throw new Exception('Duplicated correlationId: payment already being processed or processed.', 409);
         }
 
         $processor = $this->health->getOptimalProcessor();

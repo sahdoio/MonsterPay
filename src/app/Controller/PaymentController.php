@@ -6,7 +6,6 @@ namespace App\Controller;
 
 use App\Jobs\ProcessPaymentJob;
 use App\UseCases\GetPaymentsSummary;
-use App\UseCases\ProcessPayment;
 use Exception;
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Driver\DriverInterface;
